@@ -1,7 +1,6 @@
 {
-	"name": "doki-doki-dialog-generator-packs-repo",
+	"name": "dddg-repo-filters",
 	"version": "0.1.0",
-	"private": true,
 	"main": "dist/index.js",
 	"types": "dist/index.d.ts",
 	"license": "MIT",
