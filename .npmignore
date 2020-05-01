@@ -1,5 +1,9 @@
 src
 tests
+coverage
+.vscode
 .eslintrc.js
 .gitignore
 .prettierrc
+jest.config.js
+tsconfig.json
