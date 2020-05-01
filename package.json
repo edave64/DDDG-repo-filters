@@ -1,9 +1,13 @@
 {
-	"name": "dddg-repo-filters",
+	"name": "@edave64/dddg-repo-filters",
 	"version": "0.1.0",
+	"author": "edave64",
 	"main": "dist/index.js",
 	"types": "dist/index.d.ts",
 	"license": "MIT",
+	"publishConfig": {
+		"registry": "https://npm.pkg.github.com/"
+	},
 	"scripts": {
 		"build": "rimraf dist && tsc",
 		"test": "jest",
