@@ -128,6 +128,8 @@ class TypeMatcher implements CompiledMatcher {
 		'Characters',
 		'Expressions',
 		'Poses',
+		'Backgrounds',
+		'Sprites',
 		'Misc',
 	];
 	private readonly matchingTypes: Readonly<Set<string>>;
