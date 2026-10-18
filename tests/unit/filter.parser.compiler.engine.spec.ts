@@ -1,36 +1,37 @@
-import parse from '@/parse';
+import { describe, expect, it } from 'vitest';
 import compile from '@/compile';
+import type { IPack } from '@/pack';
+import parse from '@/parse';
 import authors from './people.json';
 import packsJson from './repo.json';
-import { IPack } from '@/pack';
 
 const packs = packsJson as IPack[];
 
 const [validEngine, invalidEngine, allEngine] = compile(
 	parse('engine:DDCC engine:InvalidStuff DDCC'),
 	authors,
-	packs
+	packs,
 );
 
 describe('filterparser/compile.ts/TypeMatcher', () => {
 	it('should be created from type matcher', () => {
 		expect(validEngine).toMatchInlineSnapshot(`
 		EngineMatcher {
-		  "matchingProps": Array [
+		  "matchingProps": [
 		    "ddcc2Path",
 		  ],
 		}
 	`);
 		expect(invalidEngine).toMatchInlineSnapshot(`
 		EngineMatcher {
-		  "matchingProps": Array [],
+		  "matchingProps": [],
 		}
 	`);
 		expect(allEngine).toMatchInlineSnapshot(`
 		AllMatcher {
-		  "matchers": Array [
+		  "matchers": [
 		    EngineMatcher {
-		      "matchingProps": Array [
+		      "matchingProps": [
 		        "ddcc2Path",
 		      ],
 		    },

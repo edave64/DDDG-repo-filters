@@ -1,26 +1,21 @@
 {
 	"compilerOptions": {
-		"target": "esnext",
-		"module": "esnext",
+		"target": "es2025",
+		"module": "nodenext",
 		"strict": true,
-		"jsx": "preserve",
-		"importHelpers": true,
 		"sourceMap": false,
 		"declaration": true,
-		"moduleResolution": "node",
-		"experimentalDecorators": true,
-		"esModuleInterop": true,
-		"allowSyntheticDefaultImports": true,
-		"resolveJsonModule": true,
-		"baseUrl": ".",
+		"moduleResolution": "nodenext",
+		"erasableSyntaxOnly": true,
+		"isolatedModules": true,
+		"verbatimModuleSyntax": true,
 		"outDir": "dist",
 		"rootDir": "src",
-		"types": ["jest"],
 		"paths": {
-			"@/*": ["src/*"]
+			"@/*": ["./src/*"]
 		},
-		"lib": ["esnext", "dom", "dom.iterable", "scripthost"]
+		"lib": ["ES2022"]
 	},
 	"include": ["src/**/*.ts"],
-	"exclude": ["node_modules"]
+	"exclude": []
 }

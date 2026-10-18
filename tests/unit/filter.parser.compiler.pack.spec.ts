@@ -1,15 +1,16 @@
-import parse from '@/parse';
+import { describe, expect, it } from 'vitest';
 import compile from '@/compile';
+import type { IPack } from '@/pack';
+import parse from '@/parse';
 import authors from './people.json';
 import packsJson from './repo.json';
-import { IPack } from '@/pack';
 
 const packs = packsJson as IPack[];
 
-const [validPack, invalidPack, searchWord, allPack] = compile(
+const [validPack, invalidPack, _searchWord, allPack] = compile(
 	parse('pack:Angry pack:InvalidStuff pack:word1 Angry'),
 	authors,
-	packs
+	packs,
 );
 
 describe('filterparser/compile.ts/TypeMatcher', () => {
@@ -28,7 +29,7 @@ describe('filterparser/compile.ts/TypeMatcher', () => {
 	`);
 		expect(allPack).toMatchInlineSnapshot(`
 		AllMatcher {
-		  "matchers": Array [
+		  "matchers": [
 		    PackMatcher {
 		      "isImpossible": false,
 		      "payload": "angry",

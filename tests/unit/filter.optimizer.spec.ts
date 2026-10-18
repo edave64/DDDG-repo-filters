@@ -1,5 +1,6 @@
+import { describe, expect, it } from 'vitest';
 import optimize, { deduplicateMatchers, sortByCost } from '@/optimize';
-import { Matcher } from '@/parse';
+import type { Matcher } from '@/parse';
 
 describe('filterparser/optimizer.ts', () => {
 	it('should deduplicate identical all matchers', () => {
@@ -11,10 +12,10 @@ describe('filterparser/optimizer.ts', () => {
 
 		expect(result.length).toBe(2);
 		expect(
-			result.find(r => r.type === 'all' && r.payload === 'a')
+			result.find((r) => r.type === 'all' && r.payload === 'a'),
 		).toBeTruthy();
 		expect(
-			result.find(r => r.type === 'all' && r.payload === 'b')
+			result.find((r) => r.type === 'all' && r.payload === 'b'),
 		).toBeTruthy();
 	});
 	it('should deduplicate identical matchers of the same kind', () => {
@@ -28,13 +29,13 @@ describe('filterparser/optimizer.ts', () => {
 
 		expect(result.length).toBe(3);
 		expect(
-			result.find(r => r.type === 'all' && r.payload === 'b')
+			result.find((r) => r.type === 'all' && r.payload === 'b'),
 		).toBeTruthy();
 		expect(
-			result.find(r => r.type === 'character' && r.payload === 'a')
+			result.find((r) => r.type === 'character' && r.payload === 'a'),
 		).toBeTruthy();
 		expect(
-			result.find(r => r.type === 'author' && r.payload === 'a')
+			result.find((r) => r.type === 'author' && r.payload === 'a'),
 		).toBeTruthy();
 	});
 	it('should deduplicate identical matchers of the same kind', () => {
@@ -47,13 +48,13 @@ describe('filterparser/optimizer.ts', () => {
 
 		expect(result.length).toBe(3);
 		expect(
-			result.find(r => r.type === 'all' && r.payload === 'b')
+			result.find((r) => r.type === 'all' && r.payload === 'b'),
 		).toBeTruthy();
 		expect(
-			result.find(r => r.type === 'character' && r.payload === 'a')
+			result.find((r) => r.type === 'character' && r.payload === 'a'),
 		).toBeTruthy();
 		expect(
-			result.find(r => r.type === 'author' && r.payload === 'a')
+			result.find((r) => r.type === 'author' && r.payload === 'a'),
 		).toBeTruthy();
 	});
 	it('should remove redundant matchers of the same kind', () => {
@@ -67,10 +68,10 @@ describe('filterparser/optimizer.ts', () => {
 
 		expect(result.length).toBe(2);
 		expect(
-			result.find(r => r.type === 'author' && r.payload === 'andrew')
+			result.find((r) => r.type === 'author' && r.payload === 'andrew'),
 		).toBeTruthy();
 		expect(
-			result.find(r => r.type === 'character' && r.payload === 'a')
+			result.find((r) => r.type === 'character' && r.payload === 'a'),
 		).toBeTruthy();
 	});
 	it('should remove redundant "all" matchers', () => {
@@ -98,22 +99,22 @@ describe('filterparser/optimizer.ts', () => {
 				{ type: 'all', payload: 'hand' },
 				{ type: 'author', payload: 'andrew' },
 				{ type: 'engine', payload: 'dddg1' },
-			])
+			]),
 		).toMatchInlineSnapshot(`
-		Array [
-		  Object {
+		[
+		  {
 		    "payload": "dddg1",
 		    "type": "engine",
 		  },
-		  Object {
+		  {
 		    "payload": "andrew",
 		    "type": "author",
 		  },
-		  Object {
+		  {
 		    "payload": "hand",
 		    "type": "all",
 		  },
-		  Object {
+		  {
 		    "payload": "o",
 		    "type": "all",
 		  },
@@ -126,22 +127,22 @@ describe('filterparser/optimizer.ts', () => {
 				{ type: 'all', payload: 'base' },
 				{ type: 'all', payload: 'handle' },
 				{ type: 'all', payload: 'apple' },
-			])
+			]),
 		).toMatchInlineSnapshot(`
-		Array [
-		  Object {
+		[
+		  {
 		    "payload": "handle",
 		    "type": "all",
 		  },
-		  Object {
+		  {
 		    "payload": "table",
 		    "type": "all",
 		  },
-		  Object {
+		  {
 		    "payload": "apple",
 		    "type": "all",
 		  },
-		  Object {
+		  {
 		    "payload": "base",
 		    "type": "all",
 		  },
@@ -161,16 +162,16 @@ describe('filterparser/optimizer.ts', () => {
 			{ type: 'author', payload: 'andrew' },
 		]);
 		expect(result).toMatchInlineSnapshot(`
-		Array [
-		  Object {
+		[
+		  {
 		    "payload": "andrew",
 		    "type": "author",
 		  },
-		  Object {
+		  {
 		    "payload": "a",
 		    "type": "character",
 		  },
-		  Object {
+		  {
 		    "payload": "hand",
 		    "type": "all",
 		  },
@@ -182,9 +183,9 @@ describe('filterparser/optimizer.ts', () => {
 function expectMatcher(
 	matchers: Matcher[],
 	type: Matcher['type'],
-	payload: Matcher['payload']
+	payload: Matcher['payload'],
 ) {
 	expect(
-		matchers.find(r => r.type === type && r.payload === payload)
+		matchers.find((r) => r.type === type && r.payload === payload),
 	).toBeTruthy();
 }

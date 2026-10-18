@@ -1,4 +1,4 @@
-import { Matcher } from './parse';
+import type { Matcher } from './parse.js';
 
 const matchCost: Map<Matcher['type'], number> = new Map([
 	// static property equals
@@ -21,7 +21,7 @@ export function sortByCost(matchers: Matcher[]): Matcher[] {
 	return matchers.sort(
 		(a, b) =>
 			matchCost.get(a.type)! - matchCost.get(b.type)! ||
-			b.payload.length - a.payload.length
+			b.payload.length - a.payload.length,
 	);
 }
 
@@ -53,29 +53,30 @@ export function deduplicateMatchers(matchers: Matcher[]): Matcher[] {
 			quickDeprefix.filter((matcher, idx, ary) => {
 				return !ary.find(
 					(collision, collIdx) =>
-						collIdx !== idx && collision.payload.indexOf(matcher.payload) !== -1
+						collIdx !== idx &&
+						collision.payload.indexOf(matcher.payload) !== -1,
 				);
-			})
+			}),
 		);
 	}
 
 	const specializedTypes = Array.from(splitByType.keys()).filter(
-		type => type !== 'all'
+		(type) => type !== 'all',
 	);
 
 	splitByType.set(
 		'all',
-		(splitByType.get('all') || []).filter(matcher => {
-			return !specializedTypes.find(typeKey =>
+		(splitByType.get('all') || []).filter((matcher) => {
+			return !specializedTypes.find((typeKey) =>
 				splitByType
 					.get(typeKey)!
 					.find(
-						competingMatcher =>
-							competingMatcher.payload.indexOf(matcher.payload) !== -1
-					)
+						(competingMatcher) =>
+							competingMatcher.payload.indexOf(matcher.payload) !== -1,
+					),
 			);
-		})
+		}),
 	);
 
-	return [...splitByType.values()].flatMap(x => x);
+	return [...splitByType.values()].flatMap((x) => x);
 }

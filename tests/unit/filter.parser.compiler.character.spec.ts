@@ -1,15 +1,16 @@
-import parse from '@/parse';
+import { describe, expect, it } from 'vitest';
 import compile from '@/compile';
+import type { IPack } from '@/pack';
+import parse from '@/parse';
 import authors from './people.json';
 import packsJson from './repo.json';
-import { IPack } from '@/pack';
 
 const packs = packsJson as IPack[];
 
 const [validCharacter, invalidCharacter, allCharacter] = compile(
 	parse('character:Monika character:InvalidStuff Monika'),
 	authors,
-	packs
+	packs,
 );
 
 describe('filterparser/compile.ts/AuthorMatcher', () => {
@@ -29,7 +30,7 @@ describe('filterparser/compile.ts/AuthorMatcher', () => {
 		`);
 		expect(allCharacter).toMatchInlineSnapshot(`
 		AllMatcher {
-		  "matchers": Array [
+		  "matchers": [
 		    CharacterMatcher {
 		      "matchingCharacters": Set {
 		        "Monika",

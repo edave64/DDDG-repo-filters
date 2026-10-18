@@ -1,6 +1,6 @@
-import { IAuthors, IAuthor } from './authors';
-import { IPack } from './pack';
-import { Matcher } from './parse';
+import type { IAuthor, IAuthors } from './authors.js';
+import type { IPack } from './pack.js';
+import type { Matcher } from './parse.js';
 
 export interface CompiledMatcher {
 	readonly isImpossible: boolean;
@@ -11,7 +11,7 @@ interface MatcherCompiler {
 	new (
 		payload: string,
 		peopleRepository: IAuthors,
-		packRepository: IPack[]
+		packRepository: IPack[],
 	): CompiledMatcher;
 }
 
@@ -66,13 +66,12 @@ class AuthorMatcher implements CompiledMatcher {
 		const matchingAuthors = new Set<string>();
 		for (const authorKey in peopleRepository) {
 			/* istanbul ignore next */
-			if (!Object.prototype.hasOwnProperty.call(peopleRepository, authorKey))
-				continue;
+			if (!Object.hasOwn(peopleRepository, authorKey)) continue;
 			const author = peopleRepository[authorKey]!;
 			const props = Object.keys(author) as (keyof IAuthor)[];
 			if (
 				authorKey.toLowerCase().indexOf(payload) >= 0 ||
-				props.find(prop => author[prop]!.toLowerCase().indexOf(payload) >= 0)
+				props.find((prop) => author[prop]!.toLowerCase().indexOf(payload) >= 0)
 			) {
 				matchingAuthors.add(authorKey);
 			}
@@ -81,7 +80,7 @@ class AuthorMatcher implements CompiledMatcher {
 	}
 
 	public match(pack: IPack): boolean {
-		return !!pack.authors.find(author => this.matchingAuthors.has(author));
+		return !!pack.authors.find((author) => this.matchingAuthors.has(author));
 	}
 }
 
@@ -96,27 +95,27 @@ class CharacterMatcher implements CompiledMatcher {
 	public constructor(
 		payload: string,
 		_peopleRepository: IAuthors,
-		packRepository: IPack[]
+		packRepository: IPack[],
 	) {
 		payload = payload.toLowerCase();
 		this.matchingCharacters = new Set(
 			CharacterMatcher.getUniqueCharacters(packRepository).filter(
-				char => char.toLowerCase().indexOf(payload) >= 0
-			)
+				(char) => char.toLowerCase().indexOf(payload) >= 0,
+			),
 		);
 	}
 
 	public match(pack: IPack): boolean {
-		return !!pack.characters.find(character =>
-			this.matchingCharacters.has(character)
+		return !!pack.characters.find((character) =>
+			this.matchingCharacters.has(character),
 		);
 	}
 
 	public static getUniqueCharacters(repo: Readonly<IPack[]>): string[] {
-		let unique = this.uniqueCharacters.get(repo);
+		let unique = CharacterMatcher.uniqueCharacters.get(repo);
 		if (!unique) {
-			unique = Array.from(new Set(repo.flatMap(pack => pack.characters)));
-			this.uniqueCharacters.set(repo, unique);
+			unique = Array.from(new Set(repo.flatMap((pack) => pack.characters)));
+			CharacterMatcher.uniqueCharacters.set(repo, unique);
 		}
 		return unique;
 	}
@@ -141,12 +140,14 @@ class TypeMatcher implements CompiledMatcher {
 	public constructor(payload: string) {
 		payload = payload.toLowerCase();
 		this.matchingTypes = new Set(
-			TypeMatcher.types.filter(type => type.toLowerCase().indexOf(payload) >= 0)
+			TypeMatcher.types.filter(
+				(type) => type.toLowerCase().indexOf(payload) >= 0,
+			),
 		);
 	}
 
 	public match(pack: IPack): boolean {
-		return !!pack.kind.find(character => this.matchingTypes.has(character));
+		return !!pack.kind.find((character) => this.matchingTypes.has(character));
 	}
 }
 
@@ -158,7 +159,7 @@ class PackMatcher implements CompiledMatcher {
 	public constructor(
 		payload: string,
 		_peopleRepository: IAuthors,
-		packRepository: IPack[]
+		packRepository: IPack[],
 	) {
 		payload = payload.toLowerCase();
 		this.payload = payload;
@@ -178,12 +179,12 @@ class PackMatcher implements CompiledMatcher {
 		return !!(
 			pack.id.toLowerCase().indexOf(payload) >= 0 ||
 			pack.name.toLowerCase().indexOf(payload) >= 0 ||
-			pack.searchWords.find(word => word.toLowerCase().indexOf(payload) >= 0)
+			pack.searchWords.find((word) => word.toLowerCase().indexOf(payload) >= 0)
 		);
 	}
 
 	public static getTriplets(repo: Readonly<IPack[]>): Set<string> {
-		let triplets = this.tripletCache.get(repo);
+		let triplets = PackMatcher.tripletCache.get(repo);
 		if (!triplets) {
 			triplets = new Set();
 			for (const pack of repo) {
@@ -193,7 +194,7 @@ class PackMatcher implements CompiledMatcher {
 					PackMatcher.splitTriplets(word, triplets);
 				}
 			}
-			this.tripletCache.set(repo, triplets);
+			PackMatcher.tripletCache.set(repo, triplets);
 		}
 		return triplets;
 	}
@@ -220,11 +221,13 @@ class AllMatcher implements CompiledMatcher {
 	public constructor(
 		payload: string,
 		peopleRepository: IAuthors,
-		packRepository: IPack[]
+		packRepository: IPack[],
 	) {
 		this.matchers = AllMatcher.allMatchers
-			.map(compiler => new compiler(payload, peopleRepository, packRepository))
-			.filter(matcher => !matcher.isImpossible);
+			.map(
+				(compiler) => new compiler(payload, peopleRepository, packRepository),
+			)
+			.filter((matcher) => !matcher.isImpossible);
 	}
 
 	public get isImpossible(): boolean {
@@ -232,7 +235,7 @@ class AllMatcher implements CompiledMatcher {
 	}
 
 	public match(pack: IPack): boolean {
-		return !!this.matchers.find(matcher => matcher.match(pack));
+		return !!this.matchers.find((matcher) => matcher.match(pack));
 	}
 }
 
@@ -248,10 +251,10 @@ const CompilerMatch = new Map<Matcher['type'], MatcherCompiler>([
 export default function compile(
 	matchers: Matcher[],
 	authors: IAuthors,
-	packs: IPack[]
+	packs: IPack[],
 ): CompiledMatcher[] {
 	return matchers.map(
-		matcher =>
-			new (CompilerMatch.get(matcher.type)!)(matcher.payload, authors, packs)
+		(matcher) =>
+			new (CompilerMatch.get(matcher.type)!)(matcher.payload, authors, packs),
 	);
 }

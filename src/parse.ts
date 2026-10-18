@@ -20,7 +20,7 @@ export default function parseSearchwords(str: string): Matcher[] {
 	let word = '';
 	let type = '';
 	let quote = false;
-	let escape = false;
+	let inEscape = false;
 
 	function finishWord(): void {
 		matchers.push({
@@ -29,22 +29,21 @@ export default function parseSearchwords(str: string): Matcher[] {
 		});
 		word = '';
 		type = '';
-		escape = false;
+		inEscape = false;
 		quote = false;
 	}
 
 	for (const char of str) {
-		if (escape) {
+		if (inEscape) {
 			word += char;
-			escape = false;
+			inEscape = false;
 			continue;
 		}
 		switch (char) {
 			case '\\':
-				escape = true;
+				inEscape = true;
 				continue;
-			case ':':
-				// eslint-disable-next-line no-case-declarations
+			case ':': {
 				const lowerWord = word.toLowerCase();
 				if (!quote && type === '' && prefixLookup.has(lowerWord)) {
 					type = prefixLookup.get(lowerWord)!;
@@ -52,6 +51,7 @@ export default function parseSearchwords(str: string): Matcher[] {
 					continue;
 				}
 				break;
+			}
 			case '"':
 				if (quote) {
 					finishWord();

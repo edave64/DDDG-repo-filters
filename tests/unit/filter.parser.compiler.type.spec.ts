@@ -1,15 +1,16 @@
-import parse from '@/parse';
+import { describe, expect, it } from 'vitest';
 import compile from '@/compile';
+import type { IPack } from '@/pack';
+import parse from '@/parse';
 import authors from './people.json';
 import packsJson from './repo.json';
-import { IPack } from '@/pack';
 
 const packs = packsJson as IPack[];
 
 const [validType, invalidType, allType] = compile(
 	parse('type:Expressions type:InvalidStuff Expressions'),
 	authors,
-	packs
+	packs,
 );
 
 describe('filterparser/compile.ts/TypeMatcher', () => {
@@ -28,7 +29,7 @@ describe('filterparser/compile.ts/TypeMatcher', () => {
 	`);
 		expect(allType).toMatchInlineSnapshot(`
 		AllMatcher {
-		  "matchers": Array [
+		  "matchers": [
 		    TypeMatcher {
 		      "matchingTypes": Set {
 		        "Expressions",
