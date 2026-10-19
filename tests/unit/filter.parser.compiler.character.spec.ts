@@ -7,16 +7,25 @@ import packsJson from './repo.json';
 
 const packs = packsJson as IPack[];
 
-const [validCharacter, invalidCharacter, allCharacter] = compile(
-	parse('character:Monika character:InvalidStuff Monika'),
+const [
+	validCharacter,
+	invalidCharacter,
+	allCharacter,
+	validCharacterId,
+	invalidCharacterId,
+] = compile(
+	parse(
+		'character:Monika character:InvalidStuff Monika character:Monika;dddg.buildin.base.monika:ddlc.monika character:InvalidStuff;dddg.invalid.monika:ddlc.monika',
+	),
 	authors,
 	packs,
 );
 
-describe('filterparser/compile.ts/AuthorMatcher', () => {
-	it('should be created from author matcher', () => {
+describe('filterparser/compile.ts/CharacterMatcher', () => {
+	it('should be created from character matcher', () => {
 		expect(validCharacter).toMatchInlineSnapshot(`
 		CharacterMatcher {
+		  "matchingCharacterIds": null,
 		  "matchingCharacters": Set {
 		    "Monika",
 		    "Monika R63",
@@ -24,35 +33,56 @@ describe('filterparser/compile.ts/AuthorMatcher', () => {
 		}
 		`);
 		expect(invalidCharacter).toMatchInlineSnapshot(`
-		CharacterMatcher {
-		  "matchingCharacters": Set {},
-		}
+			CharacterMatcher {
+			  "matchingCharacterIds": null,
+			  "matchingCharacters": Set {},
+			}
+		`);
+		expect(validCharacterId).toMatchInlineSnapshot(`
+			CharacterMatcher {
+			  "matchingCharacterIds": Set {
+			    "dddg.buildin.base.monika:ddlc.monika",
+			  },
+			  "matchingCharacters": Set {
+			    "Monika",
+			    "Monika R63",
+			  },
+			}
+		`);
+		expect(invalidCharacterId).toMatchInlineSnapshot(`
+			CharacterMatcher {
+			  "matchingCharacterIds": Set {},
+			  "matchingCharacters": Set {},
+			}
 		`);
 		expect(allCharacter).toMatchInlineSnapshot(`
-		AllMatcher {
-		  "matchers": [
-		    CharacterMatcher {
-		      "matchingCharacters": Set {
-		        "Monika",
-		        "Monika R63",
-		      },
-		    },
-		    PackMatcher {
-		      "isImpossible": false,
-		      "payload": "monika",
-		    },
-		  ],
-		}
-	`);
+			AllMatcher {
+			  "matchers": [
+			    CharacterMatcher {
+			      "matchingCharacterIds": null,
+			      "matchingCharacters": Set {
+			        "Monika",
+			        "Monika R63",
+			      },
+			    },
+			    PackMatcher {
+			      "isImpossible": false,
+			      "payload": "monika",
+			    },
+			  ],
+			}
+		`);
 	});
 
 	it('should return whether the match is impossible', () => {
 		expect(validCharacter.isImpossible).toBeFalsy();
 		expect(invalidCharacter.isImpossible).toBeTruthy();
 		expect(allCharacter.isImpossible).toBeFalsy();
+		expect(validCharacterId.isImpossible).toBeFalsy();
+		expect(invalidCharacterId.isImpossible).toBeTruthy();
 	});
 
-	it('should properly match packs with the author', () => {
+	it('should properly match packs with the character', () => {
 		expect(validCharacter.match(char1Pack)).toBeTruthy();
 		expect(invalidCharacter.match(char1Pack)).toBeFalsy();
 		expect(allCharacter.match(char1Pack)).toBeTruthy();
@@ -60,6 +90,9 @@ describe('filterparser/compile.ts/AuthorMatcher', () => {
 		expect(validCharacter.match(char2Pack)).toBeFalsy();
 		expect(invalidCharacter.match(char2Pack)).toBeFalsy();
 		expect(allCharacter.match(char2Pack)).toBeFalsy();
+
+		expect(validCharacterId.match(char1Pack)).toBeTruthy();
+		expect(invalidCharacterId.match(char1Pack)).toBeFalsy();
 	});
 });
 
@@ -67,6 +100,7 @@ const char1Pack: IPack = {
 	id: 'monika.expressions.angry.lunatic_rabbit.edave64',
 	name: 'Angry expressions',
 	characters: ['Monika'],
+	characterIds: ['dddg.buildin.base.monika:ddlc.monika'],
 	authors: ['Lunatic Rabbit'],
 	kind: ['Expressions'],
 	source: 'https://www.reddit.com/8wenmt',
@@ -86,6 +120,7 @@ const char2Pack: IPack = {
 	id: 'mc.oufits.shirtVest.plural_roses.edave64',
 	name: 'Shirt and Vest',
 	characters: ['MC'],
+	characterIds: ['dddg.buildin.base.mc:ddlc.mc'],
 	authors: ['Plural Roses'],
 	kind: ['Styles'],
 	source: 'https://www.reddit.com/en9ezu',

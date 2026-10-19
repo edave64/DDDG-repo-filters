@@ -9,6 +9,7 @@ export interface IPack {
 	id: string;
 	name: string;
 	characters: string[];
+	characterIds?: string[];
 	preview: string[];
 	kind: PackKind[];
 	source?: string;
@@ -17,6 +18,6 @@ export interface IPack {
 	dddg1Path: string;
 	dddg2Path: string;
 	ddcc2Path?: string;
-	searchWords: string[];
+	searchWords?: string[];
 	authors: string[];
 }

@@ -85,8 +85,16 @@ class AuthorMatcher implements CompiledMatcher {
 }
 
 class CharacterMatcher implements CompiledMatcher {
-	private static uniqueCharacters = new Map<Readonly<IPack[]>, string[]>();
+	private static uniqueCharactersCache = new WeakMap<
+		Readonly<IPack[]>,
+		string[]
+	>();
+	private static uniqueCharacterIdsCache = new WeakMap<
+		Readonly<IPack[]>,
+		string[]
+	>();
 	private readonly matchingCharacters: Readonly<Set<string>>;
+	private readonly matchingCharacterIds: Readonly<Set<string>> | null = null;
 
 	public get isImpossible(): boolean {
 		return this.matchingCharacters.size === 0;
@@ -98,6 +106,19 @@ class CharacterMatcher implements CompiledMatcher {
 		packRepository: IPack[],
 	) {
 		payload = payload.toLowerCase();
+		const splitPos = payload.indexOf(';');
+		let charId = '';
+		if (splitPos >= 0) {
+			charId = payload.substring(splitPos + 1);
+			payload = payload.substring(0, splitPos);
+		}
+		if (charId) {
+			this.matchingCharacterIds = new Set(
+				CharacterMatcher.getUniqueCharactersIds(packRepository).filter(
+					(char) => char.toLowerCase() === charId,
+				),
+			);
+		}
 		this.matchingCharacters = new Set(
 			CharacterMatcher.getUniqueCharacters(packRepository).filter(
 				(char) => char.toLowerCase().indexOf(payload) >= 0,
@@ -106,16 +127,32 @@ class CharacterMatcher implements CompiledMatcher {
 	}
 
 	public match(pack: IPack): boolean {
+		const charIds = this.matchingCharacterIds;
+		if (charIds && pack.characterIds) {
+			// If we have a character id and the pack supports it, it's the prefered way to match
+			return !!pack.characterIds.find((character) => charIds.has(character));
+		}
 		return !!pack.characters.find((character) =>
 			this.matchingCharacters.has(character),
 		);
 	}
 
 	public static getUniqueCharacters(repo: Readonly<IPack[]>): string[] {
-		let unique = CharacterMatcher.uniqueCharacters.get(repo);
+		let unique = CharacterMatcher.uniqueCharactersCache.get(repo);
 		if (!unique) {
 			unique = Array.from(new Set(repo.flatMap((pack) => pack.characters)));
-			CharacterMatcher.uniqueCharacters.set(repo, unique);
+			CharacterMatcher.uniqueCharactersCache.set(repo, unique);
+		}
+		return unique;
+	}
+
+	public static getUniqueCharactersIds(repo: Readonly<IPack[]>): string[] {
+		let unique = CharacterMatcher.uniqueCharacterIdsCache.get(repo);
+		if (!unique) {
+			unique = Array.from(
+				new Set(repo.flatMap((pack) => pack.characterIds ?? [])),
+			);
+			CharacterMatcher.uniqueCharacterIdsCache.set(repo, unique);
 		}
 		return unique;
 	}
@@ -152,7 +189,7 @@ class TypeMatcher implements CompiledMatcher {
 }
 
 class PackMatcher implements CompiledMatcher {
-	private static tripletCache = new Map<Readonly<IPack[]>, Set<string>>();
+	private static tripletCache = new WeakMap<Readonly<IPack[]>, Set<string>>();
 	private readonly payload: string;
 	public readonly isImpossible: boolean;
 
@@ -179,10 +216,16 @@ class PackMatcher implements CompiledMatcher {
 		return !!(
 			pack.id.toLowerCase().indexOf(payload) >= 0 ||
 			pack.name.toLowerCase().indexOf(payload) >= 0 ||
-			pack.searchWords.find((word) => word.toLowerCase().indexOf(payload) >= 0)
+			pack.searchWords?.find((word) => word.toLowerCase().indexOf(payload) >= 0)
 		);
 	}
 
+	/**
+	 * Returns a set of all lowercase string-triplets in all packids, names and search words.
+	 * This can be used to quickly decide if a matcher is impossible.
+	 * @param repo
+	 * @returns
+	 */
 	public static getTriplets(repo: Readonly<IPack[]>): Set<string> {
 		let triplets = PackMatcher.tripletCache.get(repo);
 		if (!triplets) {
@@ -190,8 +233,10 @@ class PackMatcher implements CompiledMatcher {
 			for (const pack of repo) {
 				PackMatcher.splitTriplets(pack.id, triplets);
 				PackMatcher.splitTriplets(pack.name, triplets);
-				for (const word of pack.searchWords) {
-					PackMatcher.splitTriplets(word, triplets);
+				if (pack.searchWords) {
+					for (const word of pack.searchWords) {
+						PackMatcher.splitTriplets(word, triplets);
+					}
 				}
 			}
 			PackMatcher.tripletCache.set(repo, triplets);
